@@ -2,7 +2,7 @@
  "app": "sedmichno-menu",
  "version": 1,
  "weekLabel": "",
- "menuUpdatedAt": 1791878516126,
+ "menuUpdatedAt": 1791878651500,
  "dishes": [
   {
    "id": "mv6e0eyxzgheq",
@@ -10,6 +10,13 @@
    "meal": "dinner",
    "name": "Риба: Лаврак на фурна",
    "recipeId": "mv6e7btpizoxi"
+  },
+  {
+   "id": "mv6ea8a4iam0t",
+   "day": 1,
+   "meal": "dinner",
+   "name": "Пържени яйца със сирене ( спанак по желание)",
+   "recipeId": null
   }
  ],
  "recipes": {
