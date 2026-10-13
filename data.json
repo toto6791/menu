@@ -2,7 +2,7 @@
  "app": "sedmichno-menu",
  "version": 1,
  "weekLabel": "",
- "menuUpdatedAt": 1791887475289,
+ "menuUpdatedAt": 1791887808169,
  "dishes": [
   {
    "id": "mv6e0eyxzgheq",
@@ -38,28 +38,18 @@
    "kcal": 0,
    "ingredients": [
     {
-     "qty": "",
-     "item": "Смес за брауни 400 г",
+     "qty": "400 г",
+     "item": "Смес за брауни  (Био микс за брауни “bett’r”)",
      "note": ""
     },
     {
-     "qty": "",
-     "item": "(Био микс за брауни “bett’r”)",
+     "qty": "120 г",
+     "item": "Масло",
      "note": ""
     },
     {
-     "qty": "",
-     "item": "Масло 120 г",
-     "note": ""
-    },
-    {
-     "qty": "",
-     "item": "Прясно мляко 200 мл",
-     "note": ""
-    },
-    {
-     "qty": "",
-     "item": "(Бадемово мляко “alpro” Barista almond)",
+     "qty": "200 мл",
+     "item": "Прясно мляко (Бадемово мляко “alpro” Barista almond)",
      "note": ""
     }
    ],
@@ -86,7 +76,7 @@
     }
    ],
    "tips": [],
-   "updatedAt": 1791887445472
+   "updatedAt": 1791887808169
   },
   "mv6e7btpizoxi": {
    "id": "mv6e7btpizoxi",
