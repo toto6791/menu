@@ -2,7 +2,7 @@
  "app": "sedmichno-menu",
  "version": 1,
  "weekLabel": "",
- "menuUpdatedAt": 1791892833404,
+ "menuUpdatedAt": 1791914998655,
  "dishes": [
   {
    "id": "mv6e0eyxzgheq",
@@ -24,6 +24,13 @@
    "meal": "dessert",
    "name": "Шоколадово брауни",
    "recipeId": "mv6ag7m7twob2"
+  },
+  {
+   "id": "mv6zx9xb19hwu",
+   "day": 4,
+   "meal": "dinner",
+   "name": "Телешки пържени кюфтета",
+   "recipeId": null
   }
  ],
  "recipes": {
