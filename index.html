@@ -73,7 +73,7 @@ nav.tabs button[aria-selected="true"]{color:var(--herb);border-top-color:var(--h
 .field label{font-size:14px;color:var(--muted)}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .row3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-input[type=text],input[type=number],input[type=search],select,textarea{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+input[type=text],input[type=number],input[type=search],input[type=password],select,textarea{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
 textarea{min-height:130px;resize:vertical;line-height:1.5}
 .hint{font-size:13px;color:var(--muted);margin:0}
 .btn{border:0;border-radius:12px;padding:12px 18px;font-weight:600;background:var(--herb);color:var(--on-herb)}
@@ -125,7 +125,7 @@ textarea{min-height:130px;resize:vertical;line-height:1.5}
 <div class="wrap">
   <header class="top">
     <h1 id="appTitle">Какво готвим тази седмица</h1>
-    <p id="weekLabel">Седмично меню</p>
+    <p><span id="weekLabel">Седмично меню</span> <span id="syncBadge" style="font-size:13px"></span></p>
   </header>
 
   <!-- Меню -->
@@ -172,8 +172,26 @@ textarea{min-height:130px;resize:vertical;line-height:1.5}
     </div>
 
     <div class="panel">
+      <h2>Споделяне чрез GitHub</h2>
+      <p class="note" id="syncStatus" style="margin:0 0 14px">Синхронизацията не е настроена.</p>
+      <div class="row">
+        <div class="field"><label for="gOwner">Потребител в GitHub</label><input id="gOwner" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="ivan-petrov"></div>
+        <div class="field"><label for="gRepo">Хранилище</label><input id="gRepo" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="menu"></div>
+      </div>
+      <div class="field">
+        <label for="gToken">Ключ за достъп</label>
+        <input id="gToken" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="github_pat_…">
+        <p class="hint">Нужен е само на телефона, от който въвеждаш рецепти. Без ключ приложението само чете. Не давай ключа на никого.</p>
+      </div>
+      <div class="actions">
+        <button class="btn" id="gSave">Запази настройките</button>
+        <button class="btn ghost" id="gSync">Синхронизирай сега</button>
+      </div>
+    </div>
+
+    <div class="panel">
       <h2>Архив на данните</h2>
-      <p class="note" style="margin:0 0 14px">Данните се пазят само на този телефон. Запази архив от време на време, за да не ги загубиш при смяна на телефона или изтриване на приложението.</p>
+      <p class="note" style="margin:0 0 14px">Данните се пазят на този телефон (и в GitHub, ако е настроено). Запази архив от време на време, за да не ги загубиш при смяна на телефона или изтриване на приложението.</p>
       <div class="actions">
         <button class="btn yolk" id="exportBtn">Запази архив</button>
         <button class="btn ghost" id="importBtn">Възстанови от архив</button>
@@ -219,15 +237,17 @@ textarea{min-height:130px;resize:vertical;line-height:1.5}
   window.appToast=toast;
 
   /* ---------- storage ---------- */
-  function blank(){return {weekLabel:"",dishes:[],recipes:{}}}
+  function blank(){return {weekLabel:"",dishes:[],recipes:{},deleted:{},menuUpdatedAt:0}}
   function valid(v){return v&&Array.isArray(v.dishes)&&v.recipes&&typeof v.recipes==="object"}
   function load(){
-    try{var v=JSON.parse(localStorage.getItem(KEY));if(valid(v))return v}catch(e){}
+    try{var v=JSON.parse(localStorage.getItem(KEY));if(valid(v)){v.deleted=v.deleted||{};v.menuUpdatedAt=v.menuUpdatedAt||0;return v}}catch(e){}
     return blank();
   }
-  function save(){
+  function save(menuChanged){
+    if(menuChanged)data.menuUpdatedAt=Date.now();
     try{localStorage.setItem(KEY,JSON.stringify(data))}
     catch(e){toast("Не успях да запиша. Паметта на телефона може да е пълна.")}
+    if(window.syncSoon)window.syncSoon();
   }
   if(navigator.storage&&navigator.storage.persist){navigator.storage.persist().catch(function(){})}
 
@@ -422,7 +442,8 @@ textarea{min-height:130px;resize:vertical;line-height:1.5}
     // свържи ястието и всички ястия със същото име, които още нямат рецепта
     if(s.dishId){var d=findDish(s.dishId);if(d)d.recipeId=id}
     data.dishes.forEach(function(d){if(!d.recipeId&&(norm(d.name)===norm(title)))d.recipeId=id});
-    save(); renderAll();
+    delete data.deleted[id];
+    save(true); renderAll();
     ui.sheet={mode:"view",recipeId:id,dishId:s.dishId};
     renderSheet(); $("sheet").scrollTop=0;
     toast("Рецептата е запазена.");
@@ -432,8 +453,9 @@ textarea{min-height:130px;resize:vertical;line-height:1.5}
     var r=data.recipes[s.recipeId];
     if(!confirm("Да изтрия ли рецептата „"+(r?r.title:"")+"“? Ястията в менюто остават, но без рецепта."))return;
     delete data.recipes[s.recipeId];
+    data.deleted[s.recipeId]=Date.now();
     data.dishes.forEach(function(d){if(d.recipeId===s.recipeId)d.recipeId=null});
-    save(); renderAll(); closeSheet(); toast("Рецептата е изтрита.");
+    save(true); renderAll(); closeSheet(); toast("Рецептата е изтрита.");
   }
 
   /* ---------- backup ---------- */
@@ -453,9 +475,125 @@ textarea{min-height:130px;resize:vertical;line-height:1.5}
     if(!valid(incoming)){toast("Файлът не е архив от това приложение.");return}
     var n=Object.keys(incoming.recipes).length;
     if(!confirm("Архивът съдържа "+n+" рецепти и "+incoming.dishes.length+" ястия в менюто. Да заменя ли текущите данни с тях?"))return;
-    data={weekLabel:incoming.weekLabel||"",dishes:incoming.dishes,recipes:incoming.recipes};
-    save(); renderAll(); toast("Данните са възстановени.");
+    var now=Date.now();
+    Object.keys(incoming.recipes).forEach(function(k){incoming.recipes[k].updatedAt=now});
+    data={weekLabel:incoming.weekLabel||"",dishes:incoming.dishes,recipes:incoming.recipes,deleted:{},menuUpdatedAt:now};
+    save(true); renderAll(); toast("Данните са възстановени.");
   }
+
+
+  /* ---------- синхронизация с GitHub ---------- */
+  var SYNC_KEY="sedmichno-sync";
+  var FILE="data.json";
+  var sync={busy:false,timer:null,again:false,lastOk:0,lastError:"",pending:false};
+  function syncCfg(){
+    var c={}; try{c=JSON.parse(localStorage.getItem(SYNC_KEY))||{}}catch(e){}
+    // На github.io адреса разпознаваме хранилището автоматично
+    var m=location.hostname.match(/^([^.]+)\.github\.io$/i);
+    if(m){
+      if(!c.owner)c.owner=m[1];
+      if(!c.repo){var seg=location.pathname.split("/").filter(Boolean)[0];c.repo=seg&&seg.indexOf(".")<0?seg:m[1]+".github.io"}
+    }
+    return c;
+  }
+  function syncCfgSave(c){try{localStorage.setItem(SYNC_KEY,JSON.stringify(c))}catch(e){}}
+  function b64encode(str){var bytes=new TextEncoder().encode(str),bin="";for(var i=0;i<bytes.length;i+=8192)bin+=String.fromCharCode.apply(null,bytes.subarray(i,i+8192));return btoa(bin)}
+  function b64decode(b64){var bin=atob(b64.replace(/\s/g,"")),bytes=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);return new TextDecoder().decode(bytes)}
+  function apiUrl(c){return "https://api.github.com/repos/"+encodeURIComponent(c.owner)+"/"+encodeURIComponent(c.repo)+"/contents/"+FILE}
+  function headers(c){var h={"Accept":"application/vnd.github+json"};if(c.token)h["Authorization"]="Bearer "+c.token;return h}
+
+  function shareable(d){return {app:"sedmichno-menu",version:1,weekLabel:d.weekLabel||"",menuUpdatedAt:d.menuUpdatedAt||0,dishes:d.dishes,recipes:d.recipes,deleted:d.deleted||{}}}
+  function merge(local,remote){
+    var out={recipes:{},deleted:{}};
+    [local.deleted||{},remote.deleted||{}].forEach(function(del){for(var k in del)out.deleted[k]=Math.max(out.deleted[k]||0,del[k])});
+    [local.recipes,remote.recipes].forEach(function(src){
+      for(var k in src){var r=src[k];if(!out.recipes[k]||(r.updatedAt||0)>(out.recipes[k].updatedAt||0))out.recipes[k]=r}
+    });
+    for(var k in out.deleted){if(out.recipes[k]&&(out.recipes[k].updatedAt||0)<=out.deleted[k])delete out.recipes[k]}
+    var menu=(remote.menuUpdatedAt||0)>(local.menuUpdatedAt||0)?remote:local;
+    out.dishes=menu.dishes||[]; out.weekLabel=menu.weekLabel||""; out.menuUpdatedAt=menu.menuUpdatedAt||0;
+    return out;
+  }
+  function sameData(a,b){return JSON.stringify(shareable(a))===JSON.stringify(shareable(b))}
+
+  function setSyncStatus(){
+    var c=syncCfg(), el=$("syncStatus"), badge=$("syncBadge"), msg, b="";
+    if(!c.owner||!c.repo){msg="Синхронизацията не е настроена.";}
+    else if(sync.busy){msg="Синхронизирам…";b="· синхронизирам";}
+    else if(sync.lastError){msg=sync.lastError;b="· несинхронизирано";}
+    else if(!navigator.onLine){msg="Няма интернет. Промените ще се изпратят, когато се свържеш.";b=sync.pending?"· чака интернет":"";}
+    else if(sync.lastOk){
+      var t=new Date(sync.lastOk);
+      msg=(c.token?"Синхронизирано":"Обновено от GitHub (само четене)")+" в "+String(t.getHours()).padStart(2,"0")+":"+String(t.getMinutes()).padStart(2,"0")+".";
+    } else msg=c.token?"Готово за синхронизация.":"Без ключ: само четене от GitHub.";
+    if(el)el.textContent=msg;
+    if(badge)badge.textContent=b;
+  }
+
+  function runSync(manual){
+    var c=syncCfg();
+    if(!c.owner||!c.repo){if(manual)toast("Попълни потребител и хранилище.");setSyncStatus();return Promise.resolve()}
+    if(!navigator.onLine){if(manual)toast("Няма интернет връзка.");setSyncStatus();return Promise.resolve()}
+    if(sync.busy){sync.again=true;return Promise.resolve()}
+    sync.busy=true; sync.lastError=""; setSyncStatus();
+    var attempt=0;
+    function once(){
+      attempt++;
+      return fetch(apiUrl(c)+"?t="+Date.now(),{headers:headers(c),cache:"no-store"}).then(function(res){
+        if(res.status===404)return {remote:null,sha:null};
+        if(res.status===401)throw {msg:"Ключът за достъп е невалиден или е изтекъл."};
+        if(res.status===403)throw {msg:"GitHub отказа достъп. Провери правата на ключа или опитай по-късно."};
+        if(!res.ok)throw {msg:"GitHub върна грешка "+res.status+"."};
+        return res.json().then(function(j){
+          var remote=null; try{remote=JSON.parse(b64decode(j.content||""))}catch(e){throw {msg:"Файлът data.json в GitHub е повреден."}}
+          return {remote:remote,sha:j.sha};
+        });
+      }).then(function(r){
+        var before=JSON.stringify(shareable(data));
+        var merged=r.remote&&valid(r.remote)?merge(data,r.remote):data;
+        if(JSON.stringify(shareable(merged))!==before){
+          data.recipes=merged.recipes; data.deleted=merged.deleted; data.dishes=merged.dishes;
+          data.weekLabel=merged.weekLabel; data.menuUpdatedAt=merged.menuUpdatedAt;
+          try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){}
+          renderAll(); if(ui.sheet&&ui.sheet.mode==="view")renderSheet();
+        }
+        var needPush=!r.remote||!valid(r.remote)||!sameData(r.remote,data);
+        if(!needPush||!c.token){sync.pending=needPush&&!!c.token;return}
+        var body={message:"Обновяване на менюто и рецептите",content:b64encode(JSON.stringify(shareable(data),null,1))};
+        if(r.sha)body.sha=r.sha;
+        return fetch(apiUrl(c),{method:"PUT",headers:Object.assign({"Content-Type":"application/json"},headers(c)),body:JSON.stringify(body)}).then(function(res){
+          if(res.ok){sync.pending=false;return}
+          if((res.status===409||res.status===422)&&attempt<3)return once(); // някой друг е записал междувременно
+          if(res.status===401)throw {msg:"Ключът за достъп е невалиден или е изтекъл."};
+          if(res.status===403||res.status===404)throw {msg:"Ключът няма право да записва в това хранилище."};
+          throw {msg:"Записът в GitHub не успя (грешка "+res.status+")."};
+        });
+      });
+    }
+    return once().then(function(){
+      sync.lastOk=Date.now(); if(manual)toast(c.token?"Синхронизирано с GitHub.":"Обновено от GitHub.");
+    }).catch(function(e){
+      sync.pending=!!c.token;
+      sync.lastError=e&&e.msg?e.msg:(navigator.onLine?"Не успях да се свържа с GitHub.":"Няма интернет. Промените ще се изпратят по-късно.");
+      if(manual)toast(sync.lastError);
+    }).then(function(){
+      sync.busy=false; setSyncStatus();
+      if(sync.again){sync.again=false;runSync(false)}
+    });
+  }
+  window.syncSoon=function(){
+    var c=syncCfg(); if(!c.owner||!c.repo||!c.token)return;
+    sync.pending=true; setSyncStatus();
+    clearTimeout(sync.timer); sync.timer=setTimeout(function(){runSync(false)},3000);
+  };
+  function fillSyncForm(){
+    var c=syncCfg(); $("gOwner").value=c.owner||""; $("gRepo").value=c.repo||""; $("gToken").value=c.token||"";
+  }
+  window.addEventListener("online",function(){runSync(false)});
+  window.addEventListener("offline",setSyncStatus);
+  document.addEventListener("visibilitychange",function(){
+    if(document.visibilityState==="visible"&&Date.now()-sync.lastOk>60000)runSync(false);
+  });
 
   /* ---------- events ---------- */
   document.addEventListener("click",function(ev){
@@ -474,7 +612,7 @@ textarea{min-height:130px;resize:vertical;line-height:1.5}
     if(ds.del){
       var dd=findDish(ds.del);
       if(!confirm("Да махна ли „"+(dd?dd.name:"")+"“ от менюто? Рецептата остава."))return;
-      data.dishes=data.dishes.filter(function(x){return x.id!==ds.del}); save(); renderAll(); return;
+      data.dishes=data.dishes.filter(function(x){return x.id!==ds.del}); save(true); renderAll(); return;
     }
     switch(t.id){
       case "tMenu": setTab("menu"); break;
@@ -492,9 +630,13 @@ textarea{min-height:130px;resize:vertical;line-height:1.5}
       case "clearWeek":
         if(!data.dishes.length)return;
         if(!confirm("Да изчистя ли менюто за седмицата? Рецептите остават."))return;
-        data.dishes=[]; data.weekLabel=""; save(); renderAll(); toast("Менюто е изчистено.");
+        data.dishes=[]; data.weekLabel=""; save(true); renderAll(); toast("Менюто е изчистено.");
         break;
       case "exportBtn": exportData(); break;
+      case "gSave":
+        syncCfgSave({owner:$("gOwner").value.trim(),repo:$("gRepo").value.trim(),token:$("gToken").value.trim()});
+        sync.lastError=""; toast("Настройките са запазени."); runSync(true); break;
+      case "gSync": runSync(true); break;
       case "importBtn": $("importFile").value=""; $("importFile").click(); break;
     }
   });
@@ -503,14 +645,14 @@ textarea{min-height:130px;resize:vertical;line-height:1.5}
     if(!name){$("aName").focus();toast("Напиши името на ястието.");return}
     var r=findRecipeByName(name);
     data.dishes.push({id:uid(),day:+$("aDay").value,meal:$("aMeal").value,name:r?r.title:name,recipeId:r?r.id:null});
-    save(); $("aName").value=""; renderAll();
+    save(true); $("aName").value=""; renderAll();
     toast(r?"Добавено, с рецепта.":"Добавено. Рецептата можеш да въведеш по-късно.");
   }
   $("aName").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();addDish()}});
   var labelTimer;
   $("wLabel").addEventListener("input",function(){
     data.weekLabel=$("wLabel").value; renderHeader();
-    clearTimeout(labelTimer); labelTimer=setTimeout(save,500);
+    clearTimeout(labelTimer); labelTimer=setTimeout(function(){save(true)},500);
   });
   $("rSearch").addEventListener("input",function(){ui.search=this.value;renderRecipes()});
   $("importFile").addEventListener("change",function(){
@@ -536,6 +678,8 @@ textarea{min-height:130px;resize:vertical;line-height:1.5}
   $("aMeal").innerHTML=MEALS.map(function(m){return '<option value="'+m[0]+'">'+m[1]+'</option>'}).join("");
   $("aMeal").value="lunch";
   renderAll();
+  fillSyncForm(); setSyncStatus();
+  runSync(false);
 
   if("serviceWorker" in navigator&&/^https?:$/.test(location.protocol)){
     window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})});
