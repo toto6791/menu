@@ -2,16 +2,8 @@
  "app": "sedmichno-menu",
  "version": 1,
  "weekLabel": "",
- "menuUpdatedAt": 1791873895762,
- "dishes": [
-  {
-   "id": "mv6bgaqa67r36",
-   "day": 1,
-   "meal": "lunch",
-   "name": "мусака",
-   "recipeId": null
-  }
- ],
+ "menuUpdatedAt": 1791878156753,
+ "dishes": [],
  "recipes": {
   "mv6ag7m7twob2": {
    "id": "mv6ag7m7twob2",
