@@ -634,3 +634,20 @@ textarea {
 .shop li.bought small {
   opacity: 0.6;
 }
+
+/* марка на продукта (в рецептата и в списъка за пазар) */
+.brand {
+  display: inline-block;
+  background: var(--herb-soft);
+  color: var(--ink);
+  border-radius: 6px;
+  padding: 0 7px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.6;
+  vertical-align: 1px;
+}
+.shop li.bought .brand {
+  opacity: 0.55;
+  text-decoration: line-through;
+}

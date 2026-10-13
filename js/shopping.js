@@ -3,6 +3,7 @@
  *   „Тази седмица“   – продуктите от рецептите на ястията в менюто
  *   „Всички рецепти“ – продуктите от всички рецепти
  *
+ * Ако продуктът има марка в рецептата, тя се показва до името.
  * Еднаквите продукти се събират: „500 г кайма“ + „300 г кайма“ = „800 г кайма“.
  * Ако мерните единици са различни, се показват една до друга: „1 бр. + 200 г лук“.
  *
@@ -108,13 +109,17 @@ function buildShoppingList(mode) {
       if (!name) return;
       var key = itemKey(name) || norm(name);
       var item = items[key];
-      if (!item) item = items[key] = { key: key, name: name, sums: {}, texts: [], from: [] };
+      if (!item) item = items[key] = { key: key, name: name, sums: {}, texts: [], from: [], brands: [] };
 
       var q = parseQty(g.qty);
       if (q) item.sums[q.unit] = (item.sums[q.unit] || 0) + q.amount;
       else if (g.qty) item.texts.push(g.qty.trim());
 
       if (!item.from.includes(recipe.title)) item.from.push(recipe.title);
+
+      // марките от всички рецепти, без повторения
+      var brand = (g.brand || "").trim();
+      if (brand && !item.brands.some((b) => norm(b) === norm(brand))) item.brands.push(brand);
     });
   });
 
@@ -126,6 +131,7 @@ function buildShoppingList(mode) {
         name: item.name,
         qty: parts.concat(item.texts).join(" + "),
         from: item.from,
+        brands: item.brands,
       };
     })
     .sort((a, b) => a.name.localeCompare(b.name, "bg"));
@@ -193,6 +199,7 @@ function renderShopping() {
           <input type="checkbox" data-buy="${esc(item.key)}"${isBought ? " checked" : ""}>
           <span class="txt">
             <span class="name">${esc(item.name)}</span>
+            ${item.brands.length ? `<span class="brand">${esc(item.brands.join(", "))}</span>` : ""}
             ${item.qty ? `<span class="q">${esc(item.qty)}</span>` : ""}
             <small>${esc(item.from.join(", "))}</small>
           </span>
@@ -213,7 +220,13 @@ function shoppingText() {
   var title = ui.shopMode === "week" ? "Пазар за седмицата" : "Пазар (всички рецепти)";
   var rows = buildShoppingList(ui.shopMode)
     .filter((x) => !bought[x.key])
-    .map((x) => "☐ " + x.name + (x.qty ? " – " + x.qty : ""));
+    .map(
+      (x) =>
+        "☐ " +
+        x.name +
+        (x.brands.length ? " (" + x.brands.join(", ") + ")" : "") +
+        (x.qty ? " – " + x.qty : ""),
+    );
   return title + "\n" + rows.join("\n");
 }
 

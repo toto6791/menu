@@ -63,8 +63,8 @@ function renderEditor(r, dish) {
 
       <div class="field">
         <label for="rfIng">Продукти</label>
-        <textarea id="rfIng" placeholder="500 г кайма&#10;2 бр. патладжани&#10;200 мл прясно мляко | топло">${esc(ingToText(r.ingredients))}</textarea>
-        <p class="hint">По един продукт на ред, с количеството отпред. Бележка може да добавиш след черта: 200 мл мляко | топло.</p>
+        <textarea id="rfIng" placeholder="500 г кайма&#10;2 бр. патладжани&#10;200 мл прясно мляко | марка: Верея">${esc(ingToText(r.ingredients))}</textarea>
+        <p class="hint">По един продукт на ред, с количеството отпред. След черта: бележка или марка, например 200 мл мляко | топло | марка: Верея.</p>
       </div>
 
       <div class="field">

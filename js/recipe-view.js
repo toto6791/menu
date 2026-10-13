@@ -49,11 +49,12 @@ function renderRecipeView(r) {
     html += '<h2 class="r-h">Продукти</h2><ul class="ing">';
     r.ingredients.forEach(function (g) {
       var note = g.note ? ` <small style="color:var(--muted)">(${esc(g.note)})</small>` : "";
+      var brand = g.brand ? ` <span class="brand">${esc(g.brand)}</span>` : "";
       html += `
         <li><label>
           <input type="checkbox">
           <span class="q">${esc(g.qty || "")}</span>
-          <span>${esc(g.item || "")}${note}</span>
+          <span>${esc(g.item || "")}${brand}${note}</span>
         </label></li>`;
     });
     html += "</ul>";

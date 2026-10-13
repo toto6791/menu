@@ -1,6 +1,8 @@
 /*
  * Превръща текста от формата в продукти и стъпки и обратно.
  *   „500 г кайма | смляна“              →  количество: 500 г, продукт: кайма, бележка: смляна
+ *   „200 мл мляко | марка: Верея“        →  … марка: Верея
+ *   „200 мл мляко [Верея]“               →  същото, марката в квадратни скоби
  *   „Запържване: Задушете лука (5 мин)“  →  заглавие, описание, 5 минути
  */
 
@@ -36,16 +38,38 @@ function lines(text) {
 
 /* ---- Продукти ---- */
 
+// Марка след черта: „марка: Верея“, „марка Верея“ или „марка - Верея“
+var BRAND = /^марка\s*[:\-–]?\s*(.+)$/i;
+
 // Текст от полето → списък с продукти
 function parseIngredients(text) {
   return lines(text)
     .map(function (line) {
-      var parts = line.split("|");
-      var main = parts[0].trim();
-      var note = parts.slice(1).join("|").trim();
+      var brand = "";
+
+      // марка в квадратни скоби, където и да е на реда
+      line = line.replace(/\[([^\]]*)\]/g, function (_, inside) {
+        brand = brand || inside.trim();
+        return " ";
+      });
+
+      // частите след чертата: марка или бележка
+      var parts = line.split("|").map((x) => x.trim());
+      var main = parts[0].replace(/\s+/g, " ");
+      var notes = [];
+      parts.slice(1).forEach(function (part) {
+        var b = part.match(BRAND);
+        if (b) brand = b[1].trim();
+        else if (part) notes.push(part);
+      });
+
+      var g = { qty: "", item: main, note: notes.join(" | "), brand: brand };
       var m = main.match(QTY);
-      if (m) return { qty: m[1].trim(), item: m[2].trim(), note: note };
-      return { qty: "", item: main, note: note };
+      if (m) {
+        g.qty = m[1].trim();
+        g.item = m[2].trim();
+      }
+      return g;
     })
     .filter((g) => g.item || g.qty);
 }
@@ -56,6 +80,7 @@ function ingToText(list) {
     .map(function (g) {
       var line = (g.qty ? g.qty + " " : "") + (g.item || "");
       if (g.note) line += " | " + g.note;
+      if (g.brand) line += " | марка: " + g.brand;
       return line.trim();
     })
     .join("\n");
