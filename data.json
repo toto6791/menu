@@ -2,8 +2,16 @@
  "app": "sedmichno-menu",
  "version": 1,
  "weekLabel": "",
- "menuUpdatedAt": 1791878156753,
- "dishes": [],
+ "menuUpdatedAt": 1791878193609,
+ "dishes": [
+  {
+   "id": "mv6e0eyxzgheq",
+   "day": 2,
+   "meal": "dinner",
+   "name": "Риба: Лаврак на фурна",
+   "recipeId": null
+  }
+ ],
  "recipes": {
   "mv6ag7m7twob2": {
    "id": "mv6ag7m7twob2",
