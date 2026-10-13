@@ -6,6 +6,7 @@
  *   - рецепта: по-скоро редактираната (updatedAt)
  *   - изтрита рецепта: изтрива се и при другите (data.deleted)
  *   - менюто за седмицата: по-скоро промененото като цяло (menuUpdatedAt)
+ *   - отметките в списъка за пазар: по-скоро промененото (boughtUpdatedAt)
  *
  * Без ключ за достъп приложението само чете.
  * Ключът се пази отделно (SYNC_KEY) и никога не се качва в GitHub.
@@ -125,6 +126,8 @@ function shareable(d) {
     dishes: d.dishes,
     recipes: d.recipes,
     deleted: d.deleted || {},
+    bought: d.bought || { week: {}, all: {} },
+    boughtUpdatedAt: d.boughtUpdatedAt || 0,
   };
 }
 
@@ -160,6 +163,11 @@ function merge(local, remote) {
   out.dishes = menu.dishes || [];
   out.weekLabel = menu.weekLabel || "";
   out.menuUpdatedAt = menu.menuUpdatedAt || 0;
+
+  // отметките в списъка за пазар – също от по-новото място
+  var shop = (remote.boughtUpdatedAt || 0) > (local.boughtUpdatedAt || 0) ? remote : local;
+  out.bought = shop.bought || { week: {}, all: {} };
+  out.boughtUpdatedAt = shop.boughtUpdatedAt || 0;
   return out;
 }
 
@@ -172,6 +180,8 @@ function applyMerged(merged) {
     dishes: merged.dishes,
     weekLabel: merged.weekLabel,
     menuUpdatedAt: merged.menuUpdatedAt,
+    bought: merged.bought,
+    boughtUpdatedAt: merged.boughtUpdatedAt,
   });
   try {
     localStorage.setItem(KEY, JSON.stringify(data));

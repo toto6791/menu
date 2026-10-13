@@ -28,6 +28,22 @@
         <div id="dayContent"></div>
       </section>
 
+      <!-- Пазар -->
+      <section id="viewShop" hidden>
+        <div class="seg" role="group" aria-label="Кой списък">
+          <button id="shopWeek" aria-pressed="true">Тази седмица</button>
+          <button id="shopAll" aria-pressed="false">Всички рецепти</button>
+        </div>
+        <div class="shop-head">
+          <span id="shopSummary"></span>
+          <span class="actions" id="shopActions" hidden>
+            <button class="icon" id="shopCopy">Копирай</button>
+            <button class="icon" id="shopClear">Махни отметките</button>
+          </span>
+        </div>
+        <div id="shopList"></div>
+      </section>
+
       <!-- Рецепти -->
       <section id="viewRecipes" hidden>
         <div class="lib-head" style="margin-top: 20px">
@@ -78,17 +94,38 @@
           <p class="note" id="syncStatus" style="margin: 0 0 14px">Синхронизацията не е настроена.</p>
           <div class="row">
             <div class="field">
-              <label for="gOwner">Потребител в GitHub</label>
-			  <input id="gOwner" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="ivan-petrov" />
+              <label for="gOwner">Потребител в GitHub</label
+              ><input
+                id="gOwner"
+                type="text"
+                autocomplete="off"
+                autocapitalize="off"
+                spellcheck="false"
+                placeholder="ivan-petrov"
+              />
             </div>
             <div class="field">
-              <label for="gRepo">Хранилище</label>
-			  <input id="gRepo" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="menu" />
+              <label for="gRepo">Хранилище</label
+              ><input
+                id="gRepo"
+                type="text"
+                autocomplete="off"
+                autocapitalize="off"
+                spellcheck="false"
+                placeholder="menu"
+              />
             </div>
           </div>
           <div class="field">
             <label for="gToken">Ключ за достъп</label>
-            <input id="gToken" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="github_pat_…" />
+            <input
+              id="gToken"
+              type="password"
+              autocomplete="off"
+              autocapitalize="off"
+              spellcheck="false"
+              placeholder="github_pat_…"
+            />
             <p class="hint">
               Нужен е само на телефона, от който въвеждаш рецепти. Без ключ приложението само чете. Не давай
               ключа на никого.
@@ -118,6 +155,7 @@
     <nav class="tabs">
       <div role="tablist">
         <button role="tab" id="tMenu" aria-selected="true">Меню</button>
+        <button role="tab" id="tShop" aria-selected="false">Пазар</button>
         <button role="tab" id="tRecipes" aria-selected="false">Рецепти</button>
         <button role="tab" id="tPlan" aria-selected="false">Планиране</button>
       </div>
@@ -142,6 +180,7 @@
     <script src="js/recipe-editor.js"></script>
     <script src="js/backup.js"></script>
     <script src="js/sync.js"></script>
+    <script src="js/shopping.js"></script>
     <script src="js/app.js"></script>
   </body>
 </html>

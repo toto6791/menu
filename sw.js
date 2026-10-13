@@ -1,10 +1,10 @@
 // Пази файловете на приложението, за да работи без интернет.
 // Заявките към GitHub (данните) не се кешират тук.
-const CACHE = "sedmichno-menu-v3";
+const CACHE = "sedmichno-menu-v4";
 const FILES = [
   "./", "./index.html", "./manifest.webmanifest", "./css/styles.css",
   "./js/config.js", "./js/utils.js", "./js/storage.js", "./js/render.js", "./js/recipe-view.js",
-  "./js/parse.js", "./js/recipe-editor.js", "./js/backup.js", "./js/sync.js", "./js/app.js",
+  "./js/parse.js", "./js/recipe-editor.js", "./js/backup.js", "./js/sync.js", "./js/shopping.js", "./js/app.js",
   "./icons/icon-192.png", "./icons/icon-512.png", "./icons/maskable-512.png",
   "./fonts/rubik.woff2", "./fonts/unbounded.woff2"
 ];

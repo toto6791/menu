@@ -58,6 +58,8 @@ function importText(text) {
     recipes: incoming.recipes,
     deleted: {},
     menuUpdatedAt: now,
+    bought: incoming.bought || { week: {}, all: {} },
+    boughtUpdatedAt: now,
   };
   save(true);
   renderAll();

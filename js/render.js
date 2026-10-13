@@ -138,11 +138,13 @@ function renderAll() {
   renderDay();
   renderRecipes();
   renderPlan();
+  renderShopping(); // виж shopping.js
 }
 
-// Превключване между „Меню“, „Рецепти“ и „Планиране“
+// Превключване между „Меню“, „Пазар“, „Рецепти“ и „Планиране“
 var TAB_TITLES = {
   menu: "Какво готвим тази седмица",
+  shop: "Списък за пазар",
   recipes: "Моите рецепти",
   plan: "Планиране",
 };
@@ -150,9 +152,11 @@ var TAB_TITLES = {
 function setTab(tab) {
   ui.tab = tab;
   $("viewMenu").hidden = tab !== "menu";
+  $("viewShop").hidden = tab !== "shop";
   $("viewRecipes").hidden = tab !== "recipes";
   $("viewPlan").hidden = tab !== "plan";
   $("tMenu").setAttribute("aria-selected", tab === "menu");
+  $("tShop").setAttribute("aria-selected", tab === "shop");
   $("tRecipes").setAttribute("aria-selected", tab === "recipes");
   $("tPlan").setAttribute("aria-selected", tab === "plan");
   $("appTitle").textContent = TAB_TITLES[tab];

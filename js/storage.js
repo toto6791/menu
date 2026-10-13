@@ -9,11 +9,20 @@
  *   data.dishes     – ястията в менюто: { id, day (0 = понеделник), meal, name, recipeId }
  *   data.recipes    – рецептите по id: { id, title, ingredients, steps, tips, … }
  *   data.deleted    – изтрити рецепти (нужно е за синхронизацията)
+ *   data.bought     – отметнатите продукти в списъка за пазар (виж shopping.js)
  */
 
 // Празни данни за първото отваряне
 function blank() {
-  return { weekLabel: "", dishes: [], recipes: {}, deleted: {}, menuUpdatedAt: 0 };
+  return {
+    weekLabel: "",
+    dishes: [],
+    recipes: {},
+    deleted: {},
+    menuUpdatedAt: 0,
+    bought: { week: {}, all: {} },
+    boughtUpdatedAt: 0,
+  };
 }
 
 // Проверка, че данните имат правилния вид
@@ -28,6 +37,8 @@ function load() {
     if (valid(v)) {
       v.deleted = v.deleted || {};
       v.menuUpdatedAt = v.menuUpdatedAt || 0;
+      v.bought = v.bought || { week: {}, all: {} };
+      v.boughtUpdatedAt = v.boughtUpdatedAt || 0;
       return v;
     }
   } catch (e) {}
@@ -56,6 +67,7 @@ var ui = {
   day: (new Date().getDay() + 6) % 7, // днешният ден, с понеделник = 0
   sheet: null, // отворената рецепта: { mode: "view" | "edit", recipeId, dishId }
   search: "",
+  shopMode: "week", // списък за пазар: "week" = тази седмица, "all" = всички рецепти
 };
 
 /* ---- Търсене в данните ---- */

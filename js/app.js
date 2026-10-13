@@ -8,6 +8,7 @@
 var ACTIONS = {
   // долното меню
   tMenu: () => setTab("menu"),
+  tShop: () => setTab("shop"),
   tRecipes: () => setTab("recipes"),
   tPlan: () => setTab("plan"),
 
@@ -31,6 +32,14 @@ var ACTIONS = {
   // планиране
   addBtn: addDish,
   clearWeek: clearWeek,
+
+  // списък за пазар (shopping.js)
+  shopWeek: () => setShopMode("week"),
+  shopAll: () => setShopMode("all"),
+  shopCopy: copyShopping,
+  shopClear: function () {
+    if (confirm("Да махна ли всички отметки в този списък?")) clearBought();
+  },
 
   // архив
   exportBtn: exportData,
@@ -124,12 +133,19 @@ function clearWeek() {
   if (!confirm("Да изчистя ли менюто за седмицата? Рецептите остават.")) return;
   data.dishes = [];
   data.weekLabel = "";
+  data.bought.week = {}; // новата седмица започва с чист списък за пазар
+  data.boughtUpdatedAt = Date.now();
   save(true);
   renderAll();
   toast("Менюто е изчистено.");
 }
 
 /* ---- Полета ---- */
+
+// Отметка „купено“ в списъка за пазар
+document.addEventListener("change", function (e) {
+  if (e.target.dataset && e.target.dataset.buy != null) toggleBought(e.target.dataset.buy);
+});
 
 // Enter в полето за ястие = „Добави“
 $("aName").addEventListener("keydown", function (e) {

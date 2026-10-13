@@ -6,13 +6,13 @@
 
 @font-face {
   font-family: "Rubik";
-  src: url("fonts/rubik.woff2") format("woff2");
+  src: url("../fonts/rubik.woff2") format("woff2");
   font-weight: 300 900;
   font-display: swap;
 }
 @font-face {
   font-family: "Unbounded";
-  src: url("fonts/unbounded.woff2") format("woff2");
+  src: url("../fonts/unbounded.woff2") format("woff2");
   font-weight: 200 900;
   font-display: swap;
 }
@@ -232,9 +232,11 @@ nav.tabs div {
 }
 nav.tabs button {
   flex: 1;
+  min-width: 0;
   border: 0;
   background: none;
-  padding: 14px 0 12px;
+  padding: 14px 2px 12px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--muted);
   border-top: 3px solid transparent;
@@ -535,4 +537,100 @@ textarea {
 }
 .toast.show {
   display: block;
+}
+
+/* ---- Списък за пазар ---- */
+
+/* превключвателят „Тази седмица / Всички рецепти“ */
+.seg {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  background: var(--herb-soft);
+  border-radius: 14px;
+  padding: 4px;
+  margin: 20px 0 14px;
+}
+.seg button {
+  border: 0;
+  background: transparent;
+  border-radius: 10px;
+  padding: 10px 6px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.seg button[aria-pressed="true"] {
+  background: var(--surface);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.shop-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  color: var(--muted);
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+.shop-head .actions {
+  gap: 0;
+}
+
+.shop {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.shop li + li {
+  border-top: 1px solid var(--line);
+}
+.shop label {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 14px 16px;
+  cursor: pointer;
+}
+.shop input {
+  width: 24px;
+  height: 24px;
+  margin: 1px 0 0;
+  flex: none;
+  accent-color: var(--herb);
+}
+.shop .txt {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 10px;
+  align-items: baseline;
+}
+.shop .name {
+  font-weight: 500;
+  font-size: 17px;
+}
+.shop .q {
+  font-weight: 600;
+  color: var(--herb);
+}
+.shop small {
+  flex-basis: 100%;
+  color: var(--muted);
+  font-size: 13px;
+}
+/* купено: задраскано и избледняло */
+.shop li.bought .name,
+.shop li.bought .q {
+  text-decoration: line-through;
+  color: var(--muted);
+}
+.shop li.bought small {
+  opacity: 0.6;
 }
