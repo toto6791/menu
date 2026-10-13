@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1F3A2E">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Седмично меню</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<style>
+@font-face{font-family:"Rubik";src:url("fonts/rubik.woff2") format("woff2");font-weight:300 900;font-display:swap}
+@font-face{font-family:"Unbounded";src:url("fonts/unbounded.woff2") format("woff2");font-weight:200 900;font-display:swap}
+:root{
+  --bg:#F2F4EF; --surface:#FFFFFF; --ink:#1B2620; --muted:#5E6B63; --line:#D9DED6;
+  --herb:#1F3A2E; --on-herb:#FFFFFF; --herb-soft:#DCE8DF; --yolk:#F2B632; --yolk-ink:#3A2A00; --danger:#B3261E;
+  --display:"Unbounded", "Arial Black", system-ui, sans-serif;
+  --body:"Rubik", "Segoe UI", Roboto, system-ui, sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121815; --surface:#1B231F; --ink:#E8EEE9; --muted:#9AA8A0; --line:#2C3832;
+    --herb:#9FD3B2; --on-herb:#10201A; --herb-soft:#24362C; --yolk-ink:#2A1E00; --danger:#F2867F;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121815; --surface:#1B231F; --ink:#E8EEE9; --muted:#9AA8A0; --line:#2C3832;
+  --herb:#9FD3B2; --on-herb:#10201A; --herb-soft:#24362C; --yolk-ink:#2A1E00; --danger:#F2867F;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;-webkit-tap-highlight-color:transparent}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--yolk);outline-offset:2px}
+[hidden]{display:none !important}
+.wrap{max-width:640px;margin:0 auto;padding:16px 16px calc(100px + env(safe-area-inset-bottom,0px))}
+
+header.top{padding:8px 0 4px}
+header.top h1{font-family:var(--display);font-weight:700;font-size:clamp(24px,7vw,34px);line-height:1.1;margin:0;letter-spacing:-.01em}
+header.top p{margin:4px 0 0;color:var(--muted)}
+.h2{font-family:var(--display);font-weight:500;font-size:20px;margin:0 0 12px}
+
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:20px 0 18px}
+.day{border:0;background:transparent;padding:10px 0 8px;border-radius:14px;display:flex;flex-direction:column;align-items:center;gap:2px}
+.day b{font-family:var(--display);font-size:18px;font-weight:700;color:var(--ink)}
+.day i{width:6px;height:6px;border-radius:50%;background:transparent;margin-top:2px}
+.day.has i{background:var(--herb)}
+.day[aria-pressed="true"]{background:var(--herb)}
+.day[aria-pressed="true"] b{color:var(--on-herb)}
+.day[aria-pressed="true"] i{background:var(--yolk)}
+
+.meal{margin-bottom:18px}
+.meal h3{font-size:14px;font-weight:600;color:var(--muted);margin:0 0 8px}
+.dish{width:100%;text-align:left;display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-bottom:8px}
+.dish .name{flex:1;font-weight:500;font-size:17px;min-width:0}
+.dish .name small{display:block;font-weight:400;font-size:13px;color:var(--muted)}
+.dish .state{font-size:13px;color:var(--muted);white-space:nowrap}
+.dish .state.ready{color:var(--herb);font-weight:600}
+.empty{background:var(--surface);border:1px dashed var(--line);border-radius:16px;padding:22px 18px;color:var(--muted)}
+
+nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);z-index:5}
+nav.tabs div{max-width:640px;margin:0 auto;display:flex}
+nav.tabs button{flex:1;border:0;background:none;padding:14px 0 12px;font-weight:600;color:var(--muted);border-top:3px solid transparent}
+nav.tabs button[aria-selected="true"]{color:var(--herb);border-top-color:var(--herb)}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:16px}
+.panel h2{font-family:var(--display);font-weight:500;font-size:18px;margin:0 0 14px}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.field label{font-size:14px;color:var(--muted)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+input[type=text],input[type=number],input[type=search],select,textarea{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+textarea{min-height:130px;resize:vertical;line-height:1.5}
+.hint{font-size:13px;color:var(--muted);margin:0}
+.btn{border:0;border-radius:12px;padding:12px 18px;font-weight:600;background:var(--herb);color:var(--on-herb)}
+.btn.yolk{background:var(--yolk);color:var(--yolk-ink)}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.danger{background:transparent;color:var(--danger);border:1px solid var(--line)}
+.btn.full{width:100%}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.alist{list-style:none;margin:0;padding:0}
+.alist li{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:10px 0;border-top:1px solid var(--line)}
+.alist li:first-child{border-top:0}
+.alist .meta{flex:1;min-width:0}
+.alist .meta small{display:block;color:var(--muted);font-size:13px}
+.alist .btns{display:flex;gap:2px}
+.icon{border:0;background:none;padding:8px;border-radius:10px;color:var(--herb);font-size:14px;font-weight:600}
+.icon.del{color:var(--danger)}
+.note{font-size:14px;color:var(--muted);margin:10px 0 0}
+.lib-head{display:flex;gap:10px;margin-bottom:14px}
+.lib-head input{flex:1}
+
+.sheet{position:fixed;inset:0;background:var(--bg);z-index:10;overflow-y:auto}
+.sheet .bar{position:sticky;top:0;background:var(--bg);padding:calc(10px + env(safe-area-inset-top,0px)) 16px 10px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);z-index:1}
+.sheet .bar button{border:0;background:var(--surface);border-radius:12px;padding:10px 14px;font-weight:600}
+.sheet .content{max-width:640px;margin:0 auto;padding:20px 16px calc(40px + env(safe-area-inset-bottom,0px))}
+.r-title{font-family:var(--display);font-weight:700;font-size:clamp(22px,6.5vw,32px);line-height:1.15;margin:0 0 8px}
+.r-sum{color:var(--muted);margin:0 0 16px}
+.facts{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px}
+.facts span{background:var(--herb-soft);border-radius:999px;padding:6px 12px;font-size:14px}
+.r-h{font-family:var(--display);font-weight:500;font-size:18px;margin:26px 0 10px}
+.ing{list-style:none;padding:0;margin:0}
+.ing li{padding:10px 0;border-bottom:1px solid var(--line)}
+.ing label{display:flex;gap:12px;align-items:flex-start;cursor:pointer}
+.ing input{width:20px;height:20px;margin-top:2px;accent-color:var(--herb);flex:none}
+.ing .q{font-weight:600;min-width:84px}
+.ing input:checked ~ span{text-decoration:line-through;color:var(--muted)}
+.steps{list-style:none;padding:0;margin:0;counter-reset:s}
+.steps li{counter-increment:s;position:relative;padding:0 0 18px 48px}
+.steps li::before{content:counter(s);position:absolute;left:0;top:0;width:34px;height:34px;border-radius:50%;background:var(--yolk);color:var(--yolk-ink);font-family:var(--display);font-weight:700;display:grid;place-items:center;font-size:15px}
+.steps h4{margin:4px 0 4px;font-size:16px}
+.steps p{margin:0;white-space:pre-wrap}
+.steps small{color:var(--muted)}
+.tips{padding-left:20px;margin:0}
+.tips li{margin-bottom:6px}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;z-index:20;display:none;max-width:90vw;text-align:center}
+.toast.show{display:block}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1 id="appTitle">Какво готвим тази седмица</h1>
+    <p id="weekLabel">Седмично меню</p>
+  </header>
+
+  <!-- Меню -->
+  <section id="viewMenu">
+    <div class="days" id="days" role="group" aria-label="Ден от седмицата"></div>
+    <h2 class="h2" id="dayName"></h2>
+    <div id="dayContent"></div>
+  </section>
+
+  <!-- Рецепти -->
+  <section id="viewRecipes" hidden>
+    <div class="lib-head" style="margin-top:20px">
+      <input type="search" id="rSearch" placeholder="Търси рецепта" aria-label="Търси рецепта">
+      <button class="btn" id="newRecipe">Нова</button>
+    </div>
+    <div id="recipeList"></div>
+  </section>
+
+  <!-- Планиране -->
+  <section id="viewPlan" hidden>
+    <div class="panel" style="margin-top:20px">
+      <h2>Добави ястие в менюто</h2>
+      <div class="row">
+        <div class="field"><label for="aDay">Ден</label><select id="aDay"></select></div>
+        <div class="field"><label for="aMeal">Хранене</label><select id="aMeal"></select></div>
+      </div>
+      <div class="field">
+        <label for="aName">Ястие</label>
+        <input id="aName" type="text" list="recipeNames" placeholder="напр. Мусака" autocomplete="off">
+        <datalist id="recipeNames"></datalist>
+        <p class="hint">Ако вече имаш рецепта с това име, тя се свързва автоматично.</p>
+      </div>
+      <button class="btn full" id="addBtn">Добави в менюто</button>
+    </div>
+
+    <div class="panel">
+      <h2>Менюто за седмицата</h2>
+      <div class="field"><label for="wLabel">Заглавие на седмицата</label><input id="wLabel" type="text" placeholder="напр. 12 – 18 октомври"></div>
+      <ul class="alist" id="planList"></ul>
+      <div class="actions" style="margin-top:14px">
+        <button class="btn ghost" id="clearWeek">Изчисти седмицата</button>
+      </div>
+      <p class="note">Изчистването маха само ястията от менюто. Рецептите остават в „Рецепти“.</p>
+    </div>
+
+    <div class="panel">
+      <h2>Архив на данните</h2>
+      <p class="note" style="margin:0 0 14px">Данните се пазят само на този телефон. Запази архив от време на време, за да не ги загубиш при смяна на телефона или изтриване на приложението.</p>
+      <div class="actions">
+        <button class="btn yolk" id="exportBtn">Запази архив</button>
+        <button class="btn ghost" id="importBtn">Възстанови от архив</button>
+      </div>
+      <input type="file" id="importFile" accept=".json,application/json,text/plain" hidden>
+    </div>
+  </section>
+</div>
+
+<nav class="tabs"><div role="tablist">
+  <button role="tab" id="tMenu" aria-selected="true">Меню</button>
+  <button role="tab" id="tRecipes" aria-selected="false">Рецепти</button>
+  <button role="tab" id="tPlan" aria-selected="false">Планиране</button>
+</div></nav>
+
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="rTitle" hidden>
+  <div class="bar">
+    <button id="closeSheet">‹ Назад</button>
+    <span style="flex:1"></span>
+    <button id="editBtn" hidden>Редактирай</button>
+  </div>
+  <div class="content" id="sheetContent"></div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function(){
+  "use strict";
+  var KEY="sedmichno-menu-v1";
+  var DAYS=["Понеделник","Вторник","Сряда","Четвъртък","Петък","Събота","Неделя"];
+  var SHORT=["Пн","Вт","Ср","Чт","Пт","Сб","Нд"];
+  var MEALS=[["breakfast","Закуска"],["lunch","Обяд"],["dinner","Вечеря"],["dessert","Десерт"]];
+  var MEAL_LABEL={}; MEALS.forEach(function(m){MEAL_LABEL[m[0]]=m[1]});
+
+  var data=load();
+  var ui={tab:"menu",day:(new Date().getDay()+6)%7,sheet:null,search:""};
+
+  function $(id){return document.getElementById(id)}
+  function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+  function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+  function norm(s){return String(s||"").trim().toLowerCase()}
+  function toast(msg){var t=$("toast");t.textContent=msg;t.classList.add("show");clearTimeout(toast._t);toast._t=setTimeout(function(){t.classList.remove("show")},2800)}
+  window.appToast=toast;
+
+  /* ---------- storage ---------- */
+  function blank(){return {weekLabel:"",dishes:[],recipes:{}}}
+  function valid(v){return v&&Array.isArray(v.dishes)&&v.recipes&&typeof v.recipes==="object"}
+  function load(){
+    try{var v=JSON.parse(localStorage.getItem(KEY));if(valid(v))return v}catch(e){}
+    return blank();
+  }
+  function save(){
+    try{localStorage.setItem(KEY,JSON.stringify(data))}
+    catch(e){toast("Не успях да запиша. Паметта на телефона може да е пълна.")}
+  }
+  if(navigator.storage&&navigator.storage.persist){navigator.storage.persist().catch(function(){})}
+
+  /* ---------- helpers ---------- */
+  function dishesFor(d){return data.dishes.filter(function(x){return x.day===d})}
+  function recipeOf(dish){return dish&&dish.recipeId?data.recipes[dish.recipeId]:null}
+  function findDish(id){for(var i=0;i<data.dishes.length;i++)if(data.dishes[i].id===id)return data.dishes[i];return null}
+  function findRecipeByName(name){
+    var n=norm(name); if(!n)return null;
+    for(var k in data.recipes)if(norm(data.recipes[k].title)===n)return data.recipes[k];
+    return null;
+  }
+  function sortedRecipes(){
+    return Object.keys(data.recipes).map(function(k){return data.recipes[k]})
+      .sort(function(a,b){return a.title.localeCompare(b.title,"bg")});
+  }
+  function mealIdx(m){for(var i=0;i<MEALS.length;i++)if(MEALS[i][0]===m)return i;return 9}
+
+  /* ---------- rendering ---------- */
+  function renderHeader(){
+    $("weekLabel").textContent=data.weekLabel||"Седмично меню";
+  }
+  function renderDays(){
+    $("days").innerHTML=DAYS.map(function(n,i){
+      return '<button class="day'+(dishesFor(i).length?' has':'')+'" aria-pressed="'+(i===ui.day)+'" data-day="'+i+'" aria-label="'+n+'"><b>'+SHORT[i]+'</b><i></i></button>';
+    }).join("");
+  }
+  function renderDay(){
+    $("dayName").textContent=DAYS[ui.day];
+    var list=dishesFor(ui.day), html="";
+    if(!list.length){
+      html='<div class="empty">Няма ястия за този ден. Добави ги от „Планиране“.</div>';
+    } else {
+      MEALS.forEach(function(m){
+        var ds=list.filter(function(x){return x.meal===m[0]});
+        if(!ds.length)return;
+        html+='<div class="meal"><h3>'+m[1]+'</h3>'+ds.map(function(x){
+          var r=recipeOf(x);
+          var time=r&&(r.prepMinutes||r.cookMinutes)?'<small>'+((r.prepMinutes||0)+(r.cookMinutes||0))+' мин общо</small>':'';
+          return '<button class="dish" data-dish="'+esc(x.id)+'"><span class="name">'+esc(x.name)+time+'</span>'
+            +(r?'<span class="state ready">Рецепта ›</span>':'<span class="state">Въведи рецепта ›</span>')+'</button>';
+        }).join("")+'</div>';
+      });
+    }
+    $("dayContent").innerHTML=html;
+  }
+  function renderRecipes(){
+    var q=norm(ui.search);
+    var list=sortedRecipes().filter(function(r){return !q||norm(r.title).indexOf(q)>-1});
+    var used={}; data.dishes.forEach(function(d){if(d.recipeId)used[d.recipeId]=true});
+    if(!Object.keys(data.recipes).length){
+      $("recipeList").innerHTML='<div class="empty">Още нямаш рецепти. Натисни „Нова“, за да въведеш първата.</div>';return;
+    }
+    if(!list.length){$("recipeList").innerHTML='<div class="empty">Няма рецепта, която съдържа „'+esc(ui.search)+'“.</div>';return}
+    $("recipeList").innerHTML=list.map(function(r){
+      var meta=[];
+      if(r.prepMinutes||r.cookMinutes)meta.push(((r.prepMinutes||0)+(r.cookMinutes||0))+" мин");
+      if(r.servings)meta.push(r.servings+" порции");
+      if(used[r.id])meta.push("в менюто тази седмица");
+      return '<button class="dish" data-recipe="'+esc(r.id)+'"><span class="name">'+esc(r.title)+(meta.length?'<small>'+esc(meta.join(", "))+'</small>':'')+'</span><span class="state">›</span></button>';
+    }).join("");
+  }
+  function renderPlan(){
+    if(document.activeElement!==$("wLabel"))$("wLabel").value=data.weekLabel||"";
+    $("recipeNames").innerHTML=sortedRecipes().map(function(r){return '<option value="'+esc(r.title)+'"></option>'}).join("");
+    var sorted=data.dishes.slice().sort(function(a,b){return a.day-b.day||mealIdx(a.meal)-mealIdx(b.meal)});
+    $("planList").innerHTML=sorted.length?sorted.map(function(x){
+      var r=recipeOf(x);
+      return '<li><div class="meta">'+esc(x.name)+'<small>'+DAYS[x.day]+', '+MEAL_LABEL[x.meal].toLowerCase()+(r?'':', без рецепта')+'</small></div>'
+        +'<span class="btns"><button class="icon" data-plan-edit="'+esc(x.id)+'">'+(r?'Рецепта':'Въведи')+'</button>'
+        +'<button class="icon del" data-del="'+esc(x.id)+'" aria-label="Премахни '+esc(x.name)+'">Премахни</button></span></li>';
+    }).join(""):'<li><div class="meta" style="color:var(--muted)">Менюто е празно. Добави първото ястие отгоре.</div></li>';
+  }
+  function renderAll(){
+    renderHeader(); renderDays(); renderDay(); renderRecipes(); renderPlan();
+  }
+
+  /* ---------- tabs ---------- */
+  function setTab(t){
+    ui.tab=t;
+    $("viewMenu").hidden=t!=="menu"; $("viewRecipes").hidden=t!=="recipes"; $("viewPlan").hidden=t!=="plan";
+    $("tMenu").setAttribute("aria-selected",t==="menu");
+    $("tRecipes").setAttribute("aria-selected",t==="recipes");
+    $("tPlan").setAttribute("aria-selected",t==="plan");
+    $("appTitle").textContent=t==="recipes"?"Моите рецепти":t==="plan"?"Планиране":"Какво готвим тази седмица";
+    window.scrollTo(0,0);
+  }
+
+  /* ---------- sheet: view / edit ---------- */
+  function openSheet(s){
+    ui.sheet=s; $("sheet").hidden=false; document.body.style.overflow="hidden";
+    renderSheet(); $("sheet").scrollTop=0;
+  }
+  function closeSheet(){ui.sheet=null;$("sheet").hidden=true;document.body.style.overflow=""}
+  function renderSheet(){
+    var s=ui.sheet; if(!s)return;
+    var r=s.recipeId?data.recipes[s.recipeId]:null;
+    if(s.mode==="view"&&!r){closeSheet();return}
+    $("editBtn").hidden=s.mode!=="view";
+    if(s.mode==="view")renderRecipeView(r); else renderEditor(r,s.dishId?findDish(s.dishId):null);
+  }
+  function renderRecipeView(r){
+    var facts=[];
+    if(r.servings)facts.push(r.servings+" порции");
+    if(r.prepMinutes)facts.push("Подготовка "+r.prepMinutes+" мин");
+    if(r.cookMinutes)facts.push("Готвене "+r.cookMinutes+" мин");
+    if(r.difficulty)facts.push(r.difficulty);
+    if(r.kcal)facts.push("≈ "+r.kcal+" kcal на порция");
+    var html='<h1 class="r-title" id="rTitle">'+esc(r.title)+'</h1>';
+    if(r.summary)html+='<p class="r-sum">'+esc(r.summary)+'</p>';
+    if(facts.length)html+='<div class="facts">'+facts.map(function(f){return '<span>'+esc(f)+'</span>'}).join("")+'</div>';
+    if(r.ingredients&&r.ingredients.length){
+      html+='<h2 class="r-h">Продукти</h2><ul class="ing">'+r.ingredients.map(function(g){
+        return '<li><label><input type="checkbox"><span class="q">'+esc(g.qty||"")+'</span><span>'+esc(g.item||"")+(g.note?' <small style="color:var(--muted)">('+esc(g.note)+')</small>':'')+'</span></label></li>';
+      }).join("")+'</ul>';
+    }
+    if(r.steps&&r.steps.length){
+      html+='<h2 class="r-h">Приготвяне</h2><ol class="steps">'+r.steps.map(function(s){
+        return '<li>'+(s.title?'<h4>'+esc(s.title)+'</h4>':'<h4></h4>')+'<p>'+esc(s.text||"")+'</p>'+(s.minutes?'<small>≈ '+esc(s.minutes)+' мин</small>':'')+'</li>';
+      }).join("")+'</ol>';
+    }
+    if(r.tips&&r.tips.length)html+='<h2 class="r-h">Съвети</h2><ul class="tips">'+r.tips.map(function(t){return '<li>'+esc(t)+'</li>'}).join("")+'</ul>';
+    $("sheetContent").innerHTML=html;
+  }
+
+  function ingToText(list){
+    return (list||[]).map(function(g){
+      return ((g.qty?g.qty+" ":"")+(g.item||"")+(g.note?" | "+g.note:"")).trim();
+    }).join("\n");
+  }
+  function stepsToText(list){
+    return (list||[]).map(function(s){
+      return (s.title?s.title+": ":"")+(s.text||"")+(s.minutes?" ("+s.minutes+" мин)":"");
+    }).join("\n");
+  }
+  function lines(v){return v.split(/\n/).map(function(x){return x.trim()}).filter(Boolean)}
+  var QTY=/^([\d.,\/½¼¾–-]+\s*(?:г|гр|кг|мл|л|ч\.\s?л\.?|с\.\s?л\.?|ч\.\s?ч\.?|к\.\s?ч\.?|бр\.?|скилидк[аи]|щипк[аи]|пакет[че]*|глав[аи]|връзк[аи]|филийк[аи])?\.?)\s+(.+)$/i;
+  function parseIngredients(v){
+    return lines(v).map(function(l){
+      var p=l.split("|"), main=p[0].trim(), note=p.slice(1).join("|").trim();
+      var m=main.match(QTY);
+      return m?{qty:m[1].trim(),item:m[2].trim(),note:note}:{qty:"",item:main,note:note};
+    }).filter(function(g){return g.item||g.qty});
+  }
+  function parseSteps(v){
+    return lines(v).map(function(l){
+      var minutes=0, mm=l.match(/\((\d+)\s*мин\.?\)\s*$/i);
+      if(mm){minutes=+mm[1];l=l.slice(0,mm.index).trim()}
+      var t=l.match(/^([^:]{2,40}):\s+(.+)$/);
+      return t?{title:t[1].trim(),text:t[2],minutes:minutes}:{title:"",text:l,minutes:minutes};
+    });
+  }
+  function renderEditor(r,dish){
+    r=r||{};
+    var diff=r.difficulty||"Средно";
+    var title=r.title||(dish?dish.name:"");
+    $("sheetContent").innerHTML='<form id="recipeForm" onsubmit="return false">'
+      +'<h1 class="r-title" id="rTitle">'+(r.id?'Редакция на рецепта':'Нова рецепта')+'</h1>'
+      +(dish?'<p class="r-sum">За менюто: '+DAYS[dish.day].toLowerCase()+', '+MEAL_LABEL[dish.meal].toLowerCase()+'</p>':'')
+      +'<div class="field"><label for="rfTitle">Име на рецептата</label><input id="rfTitle" type="text" value="'+esc(title)+'" placeholder="напр. Мусака с кайма"></div>'
+      +'<div class="field"><label for="rfSum">Кратко описание</label><input id="rfSum" type="text" value="'+esc(r.summary||"")+'" placeholder="по желание"></div>'
+      +'<div class="row3"><div class="field"><label for="rfServ">Порции</label><input id="rfServ" type="number" inputmode="numeric" min="1" max="50" value="'+esc(r.servings||4)+'"></div>'
+      +'<div class="field"><label for="rfPrep">Подготовка, мин</label><input id="rfPrep" type="number" inputmode="numeric" min="0" value="'+esc(r.prepMinutes||"")+'"></div>'
+      +'<div class="field"><label for="rfCook">Готвене, мин</label><input id="rfCook" type="number" inputmode="numeric" min="0" value="'+esc(r.cookMinutes||"")+'"></div></div>'
+      +'<div class="row"><div class="field"><label for="rfDiff">Трудност</label><select id="rfDiff">'+["Лесно","Средно","Трудно"].map(function(x){return '<option'+(x===diff?' selected':'')+'>'+x+'</option>'}).join("")+'</select></div>'
+      +'<div class="field"><label for="rfKcal">Калории на порция</label><input id="rfKcal" type="number" inputmode="numeric" min="0" value="'+esc(r.kcal||"")+'" placeholder="по желание"></div></div>'
+      +'<div class="field"><label for="rfIng">Продукти</label><textarea id="rfIng" placeholder="500 г кайма&#10;2 бр. патладжани&#10;200 мл прясно мляко | топло">'+esc(ingToText(r.ingredients))+'</textarea><p class="hint">По един продукт на ред, с количеството отпред. Бележка може да добавиш след черта: 200 мл мляко | топло.</p></div>'
+      +'<div class="field"><label for="rfSteps">Начин на приготвяне</label><textarea id="rfSteps" style="min-height:200px" placeholder="Запържване: Задушете лука в олио до омекване (5 мин)&#10;Добавете каймата и разбъркайте">'+esc(stepsToText(r.steps))+'</textarea><p class="hint">Всяка стъпка на нов ред. По желание: „Заглавие: описание“ и време накрая като (10 мин).</p></div>'
+      +'<div class="field"><label for="rfTips">Съвети</label><textarea id="rfTips" style="min-height:80px" placeholder="по един на ред, по желание">'+esc((r.tips||[]).join("\n"))+'</textarea></div>'
+      +'<div class="actions"><button type="button" class="btn" id="saveRecipe">Запази рецептата</button><button type="button" class="btn ghost" id="cancelEdit">Отказ</button>'
+      +(r.id?'<button type="button" class="btn danger" id="deleteRecipe">Изтрий рецептата</button>':'')+'</div>'
+      +'</form>';
+  }
+  function saveRecipe(){
+    var s=ui.sheet; if(!s)return;
+    var title=$("rfTitle").value.trim();
+    if(!title){toast("Напиши име на рецептата.");$("rfTitle").focus();return}
+    var other=findRecipeByName(title);
+    if(other&&other.id!==s.recipeId){toast("Вече имаш рецепта с това име.");$("rfTitle").focus();return}
+    var ing=parseIngredients($("rfIng").value), steps=parseSteps($("rfSteps").value);
+    if(!ing.length){toast("Добави поне един продукт.");$("rfIng").focus();return}
+    if(!steps.length){toast("Добави поне една стъпка.");$("rfSteps").focus();return}
+    var id=s.recipeId||uid();
+    data.recipes[id]={
+      id:id, title:title, summary:$("rfSum").value.trim(),
+      servings:parseInt($("rfServ").value,10)||0, prepMinutes:parseInt($("rfPrep").value,10)||0,
+      cookMinutes:parseInt($("rfCook").value,10)||0, difficulty:$("rfDiff").value,
+      kcal:parseInt($("rfKcal").value,10)||0,
+      ingredients:ing, steps:steps, tips:lines($("rfTips").value),
+      updatedAt:Date.now()
+    };
+    // свържи ястието и всички ястия със същото име, които още нямат рецепта
+    if(s.dishId){var d=findDish(s.dishId);if(d)d.recipeId=id}
+    data.dishes.forEach(function(d){if(!d.recipeId&&(norm(d.name)===norm(title)))d.recipeId=id});
+    save(); renderAll();
+    ui.sheet={mode:"view",recipeId:id,dishId:s.dishId};
+    renderSheet(); $("sheet").scrollTop=0;
+    toast("Рецептата е запазена.");
+  }
+  function deleteRecipe(){
+    var s=ui.sheet; if(!s||!s.recipeId)return;
+    var r=data.recipes[s.recipeId];
+    if(!confirm("Да изтрия ли рецептата „"+(r?r.title:"")+"“? Ястията в менюто остават, но без рецепта."))return;
+    delete data.recipes[s.recipeId];
+    data.dishes.forEach(function(d){if(d.recipeId===s.recipeId)d.recipeId=null});
+    save(); renderAll(); closeSheet(); toast("Рецептата е изтрита.");
+  }
+
+  /* ---------- backup ---------- */
+  function exportData(){
+    var d=new Date(), stamp=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+    var name="menu-arhiv-"+stamp+".json";
+    var json=JSON.stringify({app:"sedmichno-menu",version:1,exportedAt:d.toISOString(),data:data},null,1);
+    if(window.AndroidBridge&&window.AndroidBridge.saveBackup){window.AndroidBridge.saveBackup(json,name);return}
+    var blob=new Blob([json],{type:"application/json"});
+    var a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=name;
+    document.body.appendChild(a); a.click(); setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1000);
+    toast("Архивът е запазен в Изтегляния.");
+  }
+  function importText(text){
+    var v; try{v=JSON.parse(text)}catch(e){toast("Файлът не е валиден архив.");return}
+    var incoming=v&&v.data?v.data:v;
+    if(!valid(incoming)){toast("Файлът не е архив от това приложение.");return}
+    var n=Object.keys(incoming.recipes).length;
+    if(!confirm("Архивът съдържа "+n+" рецепти и "+incoming.dishes.length+" ястия в менюто. Да заменя ли текущите данни с тях?"))return;
+    data={weekLabel:incoming.weekLabel||"",dishes:incoming.dishes,recipes:incoming.recipes};
+    save(); renderAll(); toast("Данните са възстановени.");
+  }
+
+  /* ---------- events ---------- */
+  document.addEventListener("click",function(ev){
+    var t=ev.target.closest("button"); if(!t)return;
+    var ds=t.dataset;
+    if(ds.day!=null){ui.day=+ds.day;renderDays();renderDay();return}
+    if(ds.dish){
+      var d=findDish(ds.dish), r=recipeOf(d);
+      openSheet(r?{mode:"view",recipeId:r.id,dishId:d.id}:{mode:"edit",recipeId:null,dishId:d.id});return;
+    }
+    if(ds.recipe){openSheet({mode:"view",recipeId:ds.recipe,dishId:null});return}
+    if(ds.planEdit){
+      var pd=findDish(ds.planEdit), pr=recipeOf(pd);
+      openSheet({mode:pr?"view":"edit",recipeId:pr?pr.id:null,dishId:pd.id});return;
+    }
+    if(ds.del){
+      var dd=findDish(ds.del);
+      if(!confirm("Да махна ли „"+(dd?dd.name:"")+"“ от менюто? Рецептата остава."))return;
+      data.dishes=data.dishes.filter(function(x){return x.id!==ds.del}); save(); renderAll(); return;
+    }
+    switch(t.id){
+      case "tMenu": setTab("menu"); break;
+      case "tRecipes": setTab("recipes"); break;
+      case "tPlan": setTab("plan"); break;
+      case "closeSheet": closeSheet(); break;
+      case "editBtn": ui.sheet.mode="edit"; renderSheet(); $("sheet").scrollTop=0; break;
+      case "saveRecipe": saveRecipe(); break;
+      case "deleteRecipe": deleteRecipe(); break;
+      case "cancelEdit":
+        if(ui.sheet.recipeId){ui.sheet.mode="view";renderSheet()} else closeSheet();
+        break;
+      case "newRecipe": openSheet({mode:"edit",recipeId:null,dishId:null}); break;
+      case "addBtn": addDish(); break;
+      case "clearWeek":
+        if(!data.dishes.length)return;
+        if(!confirm("Да изчистя ли менюто за седмицата? Рецептите остават."))return;
+        data.dishes=[]; data.weekLabel=""; save(); renderAll(); toast("Менюто е изчистено.");
+        break;
+      case "exportBtn": exportData(); break;
+      case "importBtn": $("importFile").value=""; $("importFile").click(); break;
+    }
+  });
+  function addDish(){
+    var name=$("aName").value.trim();
+    if(!name){$("aName").focus();toast("Напиши името на ястието.");return}
+    var r=findRecipeByName(name);
+    data.dishes.push({id:uid(),day:+$("aDay").value,meal:$("aMeal").value,name:r?r.title:name,recipeId:r?r.id:null});
+    save(); $("aName").value=""; renderAll();
+    toast(r?"Добавено, с рецепта.":"Добавено. Рецептата можеш да въведеш по-късно.");
+  }
+  $("aName").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();addDish()}});
+  var labelTimer;
+  $("wLabel").addEventListener("input",function(){
+    data.weekLabel=$("wLabel").value; renderHeader();
+    clearTimeout(labelTimer); labelTimer=setTimeout(save,500);
+  });
+  $("rSearch").addEventListener("input",function(){ui.search=this.value;renderRecipes()});
+  $("importFile").addEventListener("change",function(){
+    var f=this.files&&this.files[0]; if(!f)return;
+    var rd=new FileReader(); rd.onload=function(){importText(String(rd.result))}; rd.onerror=function(){toast("Не успях да прочета файла.")};
+    rd.readAsText(f);
+  });
+  document.addEventListener("keydown",function(e){if(e.key==="Escape"&&ui.sheet)closeSheet()});
+
+  // Бутон „Назад“ на Android (извиква се от приложението)
+  window.appBack=function(){
+    if(ui.sheet){
+      if(ui.sheet.mode==="edit"&&ui.sheet.recipeId){ui.sheet.mode="view";renderSheet();return true}
+      closeSheet();return true;
+    }
+    if(ui.tab!=="menu"){setTab("menu");return true}
+    return false;
+  };
+
+  /* ---------- start ---------- */
+  $("aDay").innerHTML=DAYS.map(function(n,i){return '<option value="'+i+'">'+n+'</option>'}).join("");
+  $("aDay").value=String(ui.day);
+  $("aMeal").innerHTML=MEALS.map(function(m){return '<option value="'+m[0]+'">'+m[1]+'</option>'}).join("");
+  $("aMeal").value="lunch";
+  renderAll();
+
+  if("serviceWorker" in navigator&&/^https?:$/.test(location.protocol)){
+    window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})});
+  }
+})();
+</script>
+</body>
+</html>
