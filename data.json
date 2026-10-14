@@ -2,7 +2,7 @@
  "app": "sedmichno-menu",
  "version": 1,
  "weekLabel": "",
- "menuUpdatedAt": 1791974960830,
+ "menuUpdatedAt": 1791974989918,
  "dishes": [
   {
    "id": "mv6e0eyxzgheq",
@@ -31,6 +31,13 @@
    "meal": "dinner",
    "name": "Телешки пържени кюфтета",
    "recipeId": null
+  },
+  {
+   "id": "mv7zn3haqx2oc",
+   "day": 2,
+   "meal": "dinner",
+   "name": "Салата със спанак",
+   "recipeId": "mv7zmh1avs3hq"
   }
  ],
  "recipes": {
