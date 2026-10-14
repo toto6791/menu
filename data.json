@@ -2,7 +2,7 @@
  "app": "sedmichno-menu",
  "version": 1,
  "weekLabel": "",
- "menuUpdatedAt": 1791914998655,
+ "menuUpdatedAt": 1791974960830,
  "dishes": [
   {
    "id": "mv6e0eyxzgheq",
@@ -442,6 +442,82 @@
     "Поръси с магданоз"
    ],
    "updatedAt": 1791892833404
+  },
+  "mv7zmh1avs3hq": {
+   "id": "mv7zmh1avs3hq",
+   "title": "Салата със спанак",
+   "summary": "",
+   "servings": 1,
+   "prepMinutes": 10,
+   "cookMinutes": 0,
+   "difficulty": "Лесно",
+   "kcal": 0,
+   "ingredients": [
+    {
+     "qty": "",
+     "item": "Спанак",
+     "note": "",
+     "brand": ""
+    },
+    {
+     "qty": "",
+     "item": "Домати",
+     "note": "",
+     "brand": ""
+    },
+    {
+     "qty": "",
+     "item": "Маслини",
+     "note": "",
+     "brand": ""
+    },
+    {
+     "qty": "",
+     "item": "Лимон",
+     "note": "",
+     "brand": ""
+    },
+    {
+     "qty": "",
+     "item": "Сол",
+     "note": "",
+     "brand": ""
+    }
+   ],
+   "steps": [
+    {
+     "title": "",
+     "text": "Измива се спанака .",
+     "minutes": 0
+    },
+    {
+     "title": "",
+     "text": "Накъсва се или се нарязва на малки парчета.",
+     "minutes": 0
+    },
+    {
+     "title": "",
+     "text": "Нарязват се доматите",
+     "minutes": 0
+    },
+    {
+     "title": "",
+     "text": "Добавят се маслини",
+     "minutes": 0
+    },
+    {
+     "title": "",
+     "text": "Изстисква се половин или цял лимон",
+     "minutes": 0
+    },
+    {
+     "title": "",
+     "text": "Сол на вкус",
+     "minutes": 0
+    }
+   ],
+   "tips": [],
+   "updatedAt": 1791974960830
   }
  },
  "deleted": {
